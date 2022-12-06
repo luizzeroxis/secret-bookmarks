@@ -114,7 +114,7 @@ function createBookmarkElem(bookmark) {
 		aRemove.textContent = 'x';
 		aRemove.href = 'javascript:null';
 		aRemove.addEventListener('click', () => {
-			if (!confirm("Sure?")) return;
+			if (!confirm(`Remove ${bookmark.url}?`)) return;
 
 			console.log(bookmark, div);
 
@@ -131,7 +131,7 @@ function createBookmarkElem(bookmark) {
 		aEdit.textContent = 'e';
 		aEdit.href = 'javascript:null';
 		aEdit.addEventListener('click', () => {
-			let newURL = prompt('edit', bookmark.url);
+			let newURL = prompt(`Editing ${bookmark.url}:`, bookmark.url);
 			if (!(newURL == null)) {
 				bookmark.url = newURL;
 				aURL.textContent = newURL;

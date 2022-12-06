@@ -169,6 +169,6 @@ app.get('/add', async (req, res) => {
 	res.end();
 })
 
-app.listen(port, () => {
-	log(`sEcReT app listening on port ${port}`)
+const server = app.listen(port, () => {
+	console.log(`secret-bookmarks listening on address ${server.address().address} on port ${port}`)
 })
