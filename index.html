@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name='viewport' content='width=device-width, initial-scale=1' />
 
 <style>
 	
@@ -29,17 +29,25 @@ textarea {
 
 <div><textarea class='text'></textarea></div>
 
+<button class='import'>Import</button>
+
+<button class='export'>Export</button>
+
 <button class='sort'>Sort</button>
+
+<button class='replace'>Replace</button>
 
 <div class='list'>
 </div>
 
 <div class='item-add'>
-	<div><textarea class='item-add-url' placeholder="url"></textarea></div>
+	<div><textarea class='item-add-url' placeholder='url'></textarea></div>
 	<button class='item-add-submit'>add</button>
 </div>
 
 <script>
+
+console.log("STARTED");
 
 let password;
 let bookmarks = [];
@@ -47,9 +55,9 @@ let bookmarks = [];
 function start() {
 	password = window.location.hash.substring(1);
 	if (password == '') {
-		password = prompt("Password (can be sent through URL hash):");
+		password = prompt('Password (can be sent through URL hash):');
 		if (!password) {
-			document.querySelector('body').textContent = "Reload to insert password";
+			document.querySelector('body').textContent = 'Reload to insert password';
 			return;
 		}
 		window.location.hash = password;
@@ -58,15 +66,14 @@ function start() {
 }
 
 async function receive() {
-	let res = await fetch('/receive/' + password);
+	let res = await fetch('/receive?password=' + password);
+	if (res.status != 200) return;
 	let data = (await res.json()).data;
-	
-	//
 
 	console.log('RECEIVE:', data);
 	document.querySelector('.status').textContent = '('+res.status.toString()+') Received data in '+(new Date());
 
-	document.querySelector('.text').value = data.text ?? "";
+	document.querySelector('.text').value = data.text ?? '';
 
 	bookmarks = data.bookmarks ?? [];
 
@@ -81,8 +88,6 @@ async function send() {
 
 	console.log('SEND:', data);
 
-	//
-
 	let res = await fetch('/send', {
 		method: 'POST',
 		headers: {
@@ -93,6 +98,7 @@ async function send() {
 			data: data,
 		}),
 	});
+	if (res.status != 200) return;
 
 	document.querySelector('.status').textContent = '('+res.status.toString()+') Sent data in '+(new Date());
 }
@@ -123,7 +129,7 @@ function createBookmarkElem(bookmark) {
 			div.remove();
 
 			send();
-		})
+		});
 		div.append(aRemove);
 
 		let aEdit = document.createElement('a');
@@ -152,8 +158,7 @@ function createBookmarkElem(bookmark) {
 function cleanUpURL(url) {
 	if (url.startsWith('http://')) {
 		url = url.substring('http://'.length);
-	} else
-	if (url.startsWith('https://')) {
+	} else if (url.startsWith('https://')) {
 		url = url.substring('https://'.length);
 	}
 	return url;
@@ -161,7 +166,41 @@ function cleanUpURL(url) {
 
 document.querySelector('.text').addEventListener('change', () => {
 	send();
-})
+});
+
+document.querySelector('button.import').addEventListener('click', () => {
+	const input = document.createElement('input');
+	input.type = 'file';
+	input.onchange = () => {
+		if (!input.files[0]) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			const data = JSON.parse(reader.result);
+
+			document.querySelector('.text').value = data.text ?? '';
+			bookmarks = data.bookmarks;
+
+			refreshBookmarks();
+			send();
+		};
+		reader.readAsText(input.files[0]);
+	};
+	input.click();
+});
+
+document.querySelector('button.export').addEventListener('click', () => {
+	let data = {
+		text: document.querySelector('.text').value,
+		bookmarks: bookmarks,
+	};
+
+	const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+
+	const a = document.createElement('a');
+	a.href = URL.createObjectURL(blob);
+	a.download = 'data.json';
+	a.click();
+});
 
 document.querySelector('button.sort').addEventListener('click', () => {
 	bookmarks.sort((a, b) => {
@@ -171,6 +210,33 @@ document.querySelector('button.sort').addEventListener('click', () => {
 	refreshBookmarks();
 
 	send();
+});
+
+document.querySelector('button.replace').addEventListener('click', () => {
+	const oldPart = prompt(`Replace:`);
+	if (oldPart == null) return;
+
+	const newPart = prompt(`Replace ${oldPart} with:`);
+	if (newPart == null) return;
+
+	let count = 0;
+	const newBookmarks = [];
+
+	for (const bookmark of bookmarks) {
+		const newURL = bookmark.url.replaceAll(oldPart, newPart);
+
+		if (bookmark.url != newURL) {
+			count += 1;
+		}
+
+		newBookmarks.push({url: newURL});
+	}
+
+	if (confirm(`Found ${count} instances of ${oldPart}. Truly replace with ${newPart}?`)) {
+		bookmarks = newBookmarks;
+		refreshBookmarks();
+		send();
+	}
 });
 
 document.querySelector('.item-add-submit').addEventListener('click', () => {
@@ -188,7 +254,7 @@ document.querySelector('.item-add-submit').addEventListener('click', () => {
 	document.querySelector('.item-add-url').value = '';
 
 	send();
-})
+});
 
 start();
 

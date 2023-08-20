@@ -1,4 +1,3 @@
-// sEcReT
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -106,7 +105,7 @@ app.post('/send', async (req, res) => {
 
 	log('= SEND =');
 	log('Password:', password);
-	log('Data:', req.body.data)
+	log('Data:', req.body.data);
 
 	const data = JSON.stringify(req.body.data);
 	
@@ -120,8 +119,8 @@ app.post('/send', async (req, res) => {
 	res.end();
 });
 
-app.get('/receive/:password', async (req, res) => {
-	const password = req.params.password;
+app.get('/receive', async (req, res) => {
+	const password = req.query.password;
 
 	log('= RECEIVE =');
 	log('Password:', password);
