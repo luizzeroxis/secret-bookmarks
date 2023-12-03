@@ -125,11 +125,16 @@ app.get('/receive', async (req, res) => {
 	log('= RECEIVE =');
 	log('Password:', password);
 
-	let fileData = fs.readFileSync(await getFileName(password));
+	let data;
+	try {
+		let fileData = fs.readFileSync(await getFileName(password));
+	
+		log('Buffer:', fileData.length)
 
-	log('Buffer:', fileData.length)
-
-	const data = JSON.parse(await decryptData(fileData, password));
+		data = JSON.parse(await decryptData(fileData, password));
+	} catch (e) {
+		data = {}
+	}
 
 	log('Data:', data);
 
@@ -148,8 +153,16 @@ app.get('/add', async (req, res) => {
 
 	const fileName = await getFileName(password);
 	
-	let fileData = fs.readFileSync(fileName);
-	let data = JSON.parse(await decryptData(fileData, password));
+	let data;
+	try {
+		let fileData = fs.readFileSync(fileName);
+		data = JSON.parse(await decryptData(fileData, password));
+	} catch(e) {
+		data = {
+			text: '',
+			bookmarks: [],
+		};
+	}
 
 	//
 	data.bookmarks.push({
