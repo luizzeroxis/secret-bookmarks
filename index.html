@@ -4,11 +4,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1' />
 
 <style>
-	
-textarea {
-	width: 100%;
-	resize: vertical;
-}
+
 .item {
 	display: flex;
 	overflow-wrap: break-word;
@@ -27,8 +23,6 @@ textarea {
 </style>
 
 <div class='status'>Loading</div>
-
-<div><textarea class='text'></textarea></div>
 
 <button class='add'>Add</button>
 
@@ -101,8 +95,6 @@ async function receive() {
 	console.log('RECEIVE:', data);
 	$('.status').textContent = '('+res.status.toString()+') Received data in '+(new Date());
 
-	$('.text').value = data.text ?? '';
-
 	bookmarks = data.bookmarks ?? [];
 
 	refreshBookmarks();
@@ -110,7 +102,6 @@ async function receive() {
 
 async function send() {
 	let data = {
-		text: $('.text').value,
 		bookmarks: bookmarks,
 	};
 
@@ -206,10 +197,6 @@ function cleanUpURL(url) {
 	return url;
 }
 
-$('.text').addEventListener('change', () => {
-	send();
-});
-
 $('button.add').addEventListener('click', () => {
 	let url = prompt("Add URL:");
 	if (url == null || url == '') return;
@@ -235,7 +222,6 @@ $('button.import').addEventListener('click', () => {
 		reader.onload = () => {
 			const data = JSON.parse(reader.result);
 
-			$('.text').value = data.text ?? '';
 			bookmarks = data.bookmarks;
 
 			refreshBookmarks();
@@ -248,7 +234,6 @@ $('button.import').addEventListener('click', () => {
 
 $('button.export').addEventListener('click', () => {
 	let data = {
-		text: $('.text').value,
 		bookmarks: bookmarks,
 	};
 
