@@ -40,8 +40,9 @@ textarea {
 
 <button class='replace'>Replace</button>
 
-<div class='list'>
-</div>
+<input class='filter' type='text' placeholder="Filter"/>
+
+<div class='list'></div>
 
 <div class='item-add'>
 	<div><textarea class='item-add-url' placeholder='url'></textarea></div>
@@ -54,6 +55,7 @@ console.log("STARTED");
 
 let password;
 let bookmarks = [];
+let filterText = '';
 
 function $(q) {return document.querySelector(q);}
 
@@ -134,7 +136,13 @@ async function send() {
 
 function refreshBookmarks() {
 	$('.list').textContent = '';
-	for (let bookmark of bookmarks) {
+
+	const filteredBookmarks = bookmarks.filter(bookmark => {
+		if (filterText == '') return true;
+		return bookmark.title.includes(filterText);
+	});
+
+	for (let bookmark of filteredBookmarks) {
 		let div = createBookmarkElem(bookmark);
 		$('.list').append(div);
 	}
@@ -286,6 +294,12 @@ $('button.replace').addEventListener('click', () => {
 		refreshBookmarks();
 		send();
 	}
+});
+
+$('input.filter').addEventListener('input', () => {
+	filterText = $('input.filter').value;
+
+	refreshBookmarks();
 });
 
 $('.item-add-submit').addEventListener('click', () => {
