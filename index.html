@@ -30,6 +30,8 @@ textarea {
 
 <div><textarea class='text'></textarea></div>
 
+<button class='add'>Add</button>
+
 <button class='import'>Import</button>
 
 <button class='export'>Export</button>
@@ -43,11 +45,6 @@ textarea {
 <input class='filter' type='text' placeholder="Filter"/>
 
 <div class='list'></div>
-
-<div class='item-add'>
-	<div><textarea class='item-add-url' placeholder='url'></textarea></div>
-	<button class='item-add-submit'>add</button>
-</div>
 
 <script>
 
@@ -213,6 +210,23 @@ $('.text').addEventListener('change', () => {
 	send();
 });
 
+$('button.add').addEventListener('click', () => {
+	let url = prompt("Add URL:");
+	if (url == null || url == '') return;
+
+	let bookmark = {
+		title: '',
+		url: url,
+	};
+
+	bookmarks.unshift(bookmark);
+
+	let div = createBookmarkElem(bookmark);
+	$('.list').prepend(div);
+
+	send();
+});
+
 $('button.import').addEventListener('click', () => {
 	const input = html('input', {type: 'file'});
 	input.onchange = () => {
@@ -300,24 +314,6 @@ $('input.filter').addEventListener('input', () => {
 	filterText = $('input.filter').value;
 
 	refreshBookmarks();
-});
-
-$('.item-add-submit').addEventListener('click', () => {
-	let url = $('.item-add-url').value;
-
-	let bookmark = {
-		title: '',
-		url: url,
-	};
-
-	bookmarks.push(bookmark);
-
-	let div = createBookmarkElem(bookmark);
-	$('.list').append(div);
-
-	$('.item-add-url').value = '';
-
-	send();
 });
 
 start();
